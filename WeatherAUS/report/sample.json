@@ -1,0 +1,300 @@
+{
+    "preprocessing": {
+        "load_data": {
+            "time": "01:01:32 / 633486",
+            "rows": 145460,
+            "cols": 23,
+            "info": "Size 3345580 / Missing values 343248"
+        },
+        "convert_dt": {
+            "time": "01:01:32 / 692351",
+            "rows": 145460,
+            "cols": 23,
+            "info": "Dtype datetime64[ns]"
+        },
+        "to_dropna_rows": {
+            "time": "01:01:32 / 865391",
+            "rows": 145167,
+            "cols": 23,
+            "info": false
+        },
+        "to drop": {
+            "time": "01:01:32 / 913926",
+            "rows": 145167,
+            "cols": 19,
+            "info": "Drop: Evaporation, Sunshine, Cloud9am, Cloud3pm"
+        },
+        "to_dropna_cols": {
+            "time": "01:01:32 / 913988",
+            "rows": 145167,
+            "cols": 19,
+            "info": ""
+        },
+        "to_fillna": {
+            "time": "01:01:33 / 221002",
+            "rows": 145167,
+            "cols": 19,
+            "info": "Missing values 0"
+        },
+        "to_upd_outlier": {
+            "time": "01:01:33 / 463065",
+            "rows": 145167,
+            "cols": 19,
+            "info": {
+                "1": "Feature 'MinTemp' by 'border' method",
+                "2": "Feature 'MaxTemp' by 'border' method",
+                "3": "Feature 'Rainfall' by 'border' method",
+                "7": "Feature 'WindGustSpeed' by 'border' method",
+                "10": "Feature 'WindSpeed9am' by 'border' method",
+                "11": "Feature 'WindSpeed3pm' by 'border' method",
+                "12": "Feature 'Humidity9am' by 'border' method",
+                "13": "Feature 'Humidity3pm' by 'border' method",
+                "14": "Feature 'Pressure9am' by 'border' method",
+                "15": "Feature 'Pressure3pm' by 'border' method",
+                "18": "Feature 'Temp9am' by 'border' method",
+                "19": "Feature 'Temp3pm' by 'border' method"
+            }
+        },
+        "to_encode": {
+            "time": "01:01:34 / 891518",
+            "rows": 145167,
+            "cols": 31,
+            "info": {
+                "6": "Feature 'WindGustDir' by 'binary' method",
+                "8": "Feature 'WindDir9am' by 'binary' method",
+                "9": "Feature 'WindDir3pm' by 'binary' method",
+                "20": "Feature 'RainToday' by 'yes_no' method",
+                "21": "Feature 'RainTomorrow' by 'yes_no' method"
+            }
+        }
+    },
+    "settings": {
+        "path_to_csv": "input/weatherAUS.csv",
+        "targets": {
+            "1": {
+                "column": "RainTomorrow",
+                "models": []
+            }
+        },
+        "dropna": {
+            "status": true,
+            "thresh": 5
+        },
+        "columns": {
+            "date": "Date",
+            "city": "Location"
+        },
+        "features": {
+            "1": {
+                "name": "MinTemp",
+                "drop": false,
+                "dropna": false,
+                "fillna": "num-smart",
+                "outlier": {
+                    "update": true,
+                    "method": "border"
+                }
+            },
+            "2": {
+                "name": "MaxTemp",
+                "drop": false,
+                "dropna": false,
+                "fillna": "num-smart",
+                "outlier": {
+                    "update": true,
+                    "method": "border"
+                }
+            },
+            "3": {
+                "name": "Rainfall",
+                "drop": false,
+                "dropna": false,
+                "fillna": "num-smart",
+                "outlier": {
+                    "update": true,
+                    "method": "border"
+                }
+            },
+            "4": {
+                "name": "Evaporation",
+                "drop": true,
+                "dropna": false,
+                "fillna": "num-smart",
+                "encoder": {
+                    "update": false,
+                    "method": ""
+                }
+            },
+            "5": {
+                "name": "Sunshine",
+                "drop": true,
+                "dropna": false,
+                "fillna": "num-smart",
+                "encoder": {
+                    "update": false,
+                    "method": ""
+                }
+            },
+            "6": {
+                "name": "WindGustDir",
+                "drop": false,
+                "dropna": false,
+                "fillna": "num-smart",
+                "encoder": {
+                    "update": true,
+                    "method": "binary"
+                }
+            },
+            "7": {
+                "name": "WindGustSpeed",
+                "drop": false,
+                "dropna": false,
+                "fillna": "obj-smart",
+                "outlier": {
+                    "update": true,
+                    "method": "border"
+                }
+            },
+            "8": {
+                "name": "WindDir9am",
+                "drop": false,
+                "dropna": false,
+                "fillna": "num-smart",
+                "encoder": {
+                    "update": true,
+                    "method": "binary"
+                }
+            },
+            "9": {
+                "name": "WindDir3pm",
+                "drop": false,
+                "dropna": false,
+                "fillna": "obj-smart",
+                "encoder": {
+                    "update": true,
+                    "method": "binary"
+                }
+            },
+            "10": {
+                "name": "WindSpeed9am",
+                "drop": false,
+                "dropna": false,
+                "fillna": "obj-smart",
+                "outlier": {
+                    "update": true,
+                    "method": "border"
+                }
+            },
+            "11": {
+                "name": "WindSpeed3pm",
+                "drop": false,
+                "dropna": false,
+                "fillna": "num-smart",
+                "outlier": {
+                    "update": true,
+                    "method": "border"
+                }
+            },
+            "12": {
+                "name": "Humidity9am",
+                "drop": false,
+                "dropna": false,
+                "fillna": "num-smart",
+                "outlier": {
+                    "update": true,
+                    "method": "border"
+                }
+            },
+            "13": {
+                "name": "Humidity3pm",
+                "drop": false,
+                "dropna": false,
+                "fillna": "num-smart",
+                "outlier": {
+                    "update": true,
+                    "method": "border"
+                }
+            },
+            "14": {
+                "name": "Pressure9am",
+                "drop": false,
+                "dropna": false,
+                "fillna": "num-smart",
+                "outlier": {
+                    "update": true,
+                    "method": "border"
+                }
+            },
+            "15": {
+                "name": "Pressure3pm",
+                "drop": false,
+                "dropna": false,
+                "fillna": "num-smart",
+                "outlier": {
+                    "update": true,
+                    "method": "border"
+                }
+            },
+            "16": {
+                "name": "Cloud9am",
+                "drop": true,
+                "dropna": false,
+                "fillna": "num-smart",
+                "encoder": {
+                    "update": false,
+                    "method": ""
+                }
+            },
+            "17": {
+                "name": "Cloud3pm",
+                "drop": true,
+                "dropna": false,
+                "fillna": "num-smart",
+                "encoder": {
+                    "update": false,
+                    "method": ""
+                }
+            },
+            "18": {
+                "name": "Temp9am",
+                "drop": false,
+                "dropna": false,
+                "fillna": "num-smart",
+                "outlier": {
+                    "update": true,
+                    "method": "border"
+                }
+            },
+            "19": {
+                "name": "Temp3pm",
+                "drop": false,
+                "dropna": false,
+                "fillna": "num-smart",
+                "outlier": {
+                    "update": true,
+                    "method": "border"
+                }
+            },
+            "20": {
+                "name": "RainToday",
+                "drop": false,
+                "dropna": false,
+                "fillna": "obj-smart",
+                "encoder": {
+                    "update": true,
+                    "method": "yes_no"
+                }
+            },
+            "21": {
+                "name": "RainTomorrow",
+                "drop": false,
+                "dropna": false,
+                "fillna": "obj-smart",
+                "encoder": {
+                    "update": true,
+                    "method": "yes_no"
+                }
+            }
+        }
+    }
+}

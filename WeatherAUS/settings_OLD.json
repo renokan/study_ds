@@ -1,0 +1,166 @@
+{
+    "path_to_csv": "input/weatherAUS.csv",
+    "targets": {
+        "1": {
+            "column": "RainTomorrow",
+            "models": []
+        }
+    },
+    "dropna": {
+        "status": true,
+        "thresh": 5
+    },
+    "columns": {
+        "date": "Date",
+        "city": "Location"
+    },
+    "features": {
+        "1": {
+            "name": "MinTemp",
+            "drop": false,
+            "dropna": false,
+            "fillna": "num-smart",
+            "fillout": ""
+        },
+        "2": {
+            "name": "MaxTemp",
+            "drop": false,
+            "dropna": false,
+            "fillna": "num-smart",
+            "fillout": ""
+        },
+        "3": {
+            "name": "Rainfall",
+            "drop": false,
+            "dropna": false,
+            "fillna": "num-smart",
+            "fillout": ""
+        },
+        "4": {
+            "name": "Evaporation",
+            "drop": true,
+            "dropna": false,
+            "fillna": "num-smart",
+            "fillout": ""
+        },
+        "5": {
+            "name": "Sunshine",
+            "drop": true,
+            "dropna": false,
+            "fillna": "num-smart",
+            "fillout": ""
+        },
+        "6": {
+            "name": "WindGustDir",
+            "drop": false,
+            "dropna": false,
+            "fillna": "num-smart",
+            "fillout": ""
+        },
+        "7": {
+            "name": "WindGustSpeed",
+            "drop": false,
+            "dropna": false,
+            "fillna": "obj-smart",
+            "fillout": ""
+        },
+        "8": {
+            "name": "WindDir9am",
+            "drop": false,
+            "dropna": false,
+            "fillna": "num-smart",
+            "fillout": ""
+        },
+        "9": {
+            "name": "WindDir3pm",
+            "drop": false,
+            "dropna": false,
+            "fillna": "obj-smart",
+            "fillout": ""
+        },
+        "10": {
+            "name": "WindSpeed9am",
+            "drop": false,
+            "dropna": false,
+            "fillna": "obj-smart",
+            "fillout": ""
+        },
+        "11": {
+            "name": "WindSpeed3pm",
+            "drop": false,
+            "dropna": false,
+            "fillna": "num-smart",
+            "fillout": ""
+        },
+        "12": {
+            "name": "Humidity9am",
+            "drop": false,
+            "dropna": false,
+            "fillna": "num-smart",
+            "fillout": ""
+        },
+        "13": {
+            "name": "Humidity3pm",
+            "drop": false,
+            "dropna": false,
+            "fillna": "num-smart",
+            "fillout": ""
+        },
+        "14": {
+            "name": "Pressure9am",
+            "drop": false,
+            "dropna": false,
+            "fillna": "num-smart",
+            "fillout": ""
+        },
+        "15": {
+            "name": "Pressure3pm",
+            "drop": false,
+            "dropna": false,
+            "fillna": "num-smart",
+            "fillout": ""
+        },
+        "16": {
+            "name": "Cloud9am",
+            "drop": true,
+            "dropna": false,
+            "fillna": "num-smart",
+            "fillout": ""
+        },
+        "17": {
+            "name": "Cloud3pm",
+            "drop": true,
+            "dropna": false,
+            "fillna": "num-smart",
+            "fillout": ""
+        },
+        "18": {
+            "name": "Temp9am",
+            "drop": false,
+            "dropna": false,
+            "fillna": "num-smart",
+            "fillout": ""
+        },
+        "19": {
+            "name": "Temp3pm",
+            "drop": false,
+            "dropna": false,
+            "fillna": "num-smart",
+            "fillout": ""
+        },
+        "20": {
+            "name": "RainToday",
+            "drop": false,
+            "dropna": false,
+            "fillna": "obj-smart",
+            "fillout": ""
+        },
+        "21": {
+            "name": "RainTomorrow",
+            "drop": false,
+            "dropna": false,
+            "fillna": "obj-smart",
+            "fillout": ""
+        }
+    }
+}
