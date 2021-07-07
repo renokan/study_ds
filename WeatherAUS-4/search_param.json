@@ -1,0 +1,15 @@
+{
+    "logistic-0": {
+        "logistic__C": [0.001, 0.1, 1, 10, 1000]
+    },
+    "logistic-1": {
+        "logistic__C": [0.001, 0.01, 0.1, 1, 10, 100, 1000],
+        "logistic__penalty": ["l1"],
+        "logistic__solver" : ["liblinear"]
+    },
+    "logistic-2": {
+        "logistic__C": [0.001, 0.01, 0.1, 1, 10, 100, 1000],
+        "logistic__penalty": ["l2"],
+        "logistic__solver" : ["liblinear", "newton-cg", "lbfgs"]
+    }
+}
