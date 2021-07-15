@@ -40,5 +40,14 @@
         "Humidity3pm", "Humidity_Diff",
         "Pressure3pm", "Pressure_Diff",
         "RainToday", "RainTomorrow"
+    ],
+    "var-2": [
+        "Date",
+        "Diff_Temp", "Temp3pm",
+        "WindDir_Change", "WindSpeed_Diff",
+        "WindDir9am", "WindDir3pm", "WindSpeed9am", "WindSpeed3pm",
+        "Humidity9am", "Humidity3pm", "Humidity_Diff",
+        "Pressure9am", "Pressure3pm", "Pressure_Diff",
+        "RainToday", "RainTomorrow"
     ]
 }

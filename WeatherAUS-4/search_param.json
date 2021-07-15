@@ -1,15 +1,71 @@
 {
-    "logistic-0": {
-        "logistic__C": [0.001, 0.1, 1, 10, 1000]
+    "logreg-0": {
+        "logreg__C": [0.001, 0.01, 0.1, 1, 10, 100, 1000]
     },
-    "logistic-1": {
-        "logistic__C": [0.001, 0.01, 0.1, 1, 10, 100, 1000],
-        "logistic__penalty": ["l1"],
-        "logistic__solver" : ["liblinear"]
+    "logreg-1": {
+        "logreg__C": [0.001, 0.01, 0.1, 1, 10, 100, 1000],
+        "logreg__penalty": ["l1"],
+        "logreg__solver" : ["liblinear"]
     },
-    "logistic-2": {
-        "logistic__C": [0.001, 0.01, 0.1, 1, 10, 100, 1000],
-        "logistic__penalty": ["l2"],
-        "logistic__solver" : ["liblinear", "newton-cg", "lbfgs"]
+    "logreg-2": {
+        "logreg__C": [0.001, 0.01, 0.1, 1, 10, 100, 1000],
+        "logreg__penalty": ["l2"],
+        "logreg__solver" : ["liblinear", "newton-cg", "lbfgs"]
+    },
+    "knn-0": {
+        "knn__n_neighbors": [3, 5, 7]
+    },
+    "knn-1": {
+        "knn__n_neighbors": [3, 5, 7],
+        "knn__weights": ["uniform", "distance"]
+    },
+    "knn-2": {
+        "knn__n_neighbors": [9, 12, 15]
+    },
+    "knn-3": {
+        "knn__n_neighbors": [18, 25, 35]
+    },
+    "svc-0": {
+        "svc__C": [1],
+        "svc__gamma": ["scale"],
+        "svc__kernel": ["rbf"]
+    },
+    "tree-0": {
+        "tree__criterion": ["gini", "entropy"]
+    },
+    "tree-1": {
+        "tree__criterion": ["gini", "entropy"],
+        "tree__max_depth": [3, 9, 15]
+    },
+    "tree-2": {
+        "tree__criterion": ["gini", "entropy"],
+        "tree__max_depth": [10, 20, 30]
+    },
+    "forest-0": {
+        "forest__n_estimators": [100, 200, 500],
+        "forest__max_features": ["auto"]
+    },
+    "forest-1": {
+        "forest__n_estimators": [100, 200, 500],
+        "forest__max_features": ["auto", "sqrt", "log2"]
+    },
+    "forest-2": {
+        "forest__n_estimators": [100, 200, 500],
+        "forest__max_features": ["auto", "sqrt", "log2"],
+        "forest__criterion": ["gini", "entropy"]
+    },
+    "forest-3": {
+        "forest__n_estimators": [100, 200, 500],
+        "forest__max_features": ["auto", "sqrt", "log2"],
+        "forest__criterion": ["gini", "entropy"],
+        "forest__max_depth": [5, 10, 15, 30]
+    },
+    "mpl-0": {
+        "mpl__activation": ["relu"],
+        "mpl__solver": ["adam"]
+    },
+    "mpl-1": {
+        "mpl__activation": ["relu", "tanh"],
+        "mpl__solver": ["adam", "lbfgs", "sgd"]
     }
 }
