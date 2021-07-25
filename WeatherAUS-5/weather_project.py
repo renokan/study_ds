@@ -188,7 +188,7 @@ if __name__ == '__main__':
     estimator = get_estimator(model_type, features)
     param_grid = get_param_grid(model_type)
     
-    search = we.get_search(estimator, param_grid)
+    search = get_search(estimator, param_grid)
     search.fit(X_train, y_train)
     
     predict = search.predict(X_test)
@@ -205,3 +205,6 @@ if __name__ == '__main__':
     predict = search.predict(X_test)
     
     save_stats(y_test, predict)
+
+    print("The end")
+    
