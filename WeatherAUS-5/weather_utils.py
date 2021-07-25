@@ -297,3 +297,49 @@ def print_stats(y_test, predict, metrics=False):
         print("recall:", metric.recall_score(y_test, predict))
         print("f1:", metric.f1_score(y_test, predict))    
     
+
+def add_info(report, info):
+    """ \o /"""
+    if not isinstance(info, str):
+        info = str(info)
+
+    report.append("\n" + info)
+    
+    return report
+
+    
+def add_stats(report, y_test, predict):
+    """ \o/ """
+    info = "Confusion matrix:\n{}".format(
+        metric.confusion_matrix(y_test, predict)
+    )
+    report = add_info(report, info)
+
+    report = add_info(report, metric.classification_report(y_test, predict,
+                                                           digits=3))
+    info = "balanced_accuracy: {}".format(
+        metric.balanced_accuracy_score(y_test, predict)
+    )
+    report = add_info(report, info)
+
+    info = "accuracy: {}".format(
+        metric.accuracy_score(y_test, predict)
+    )
+    report = add_info(report, info)
+
+    info = "roc_auc: {}".format(
+        metric.roc_auc_score(y_test, predict)
+    )
+    report = add_info(report, info)
+
+    info = "recall: {}".format(
+        metric.recall_score(y_test, predict)
+    )
+    report = add_info(report, info)
+
+    info = "f1: {}".format(
+        metric.f1_score(y_test, predict)
+    )
+    report = add_info(report, info)
+
+    return report

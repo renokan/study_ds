@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 
 from imblearn.pipeline import Pipeline as PipelineIMB
@@ -28,14 +29,46 @@ TARGET_NAME = "RainTomorrow"
 COLUMN_SPLIT = "Region"
 COLUMN_VALUE = "5"
 
+SCORE = "roc_auc"  # "f1" / "roc_auc" / "balanced_accuracy"
+
 def print_stats(y_actual, y_predit, metrics=False):
     """ \o/ """
     we.print_stats(y_actual, y_predit, metrics=False)
 
-
-def save_stats(y_actual, y_predit):
+    
+def save_report(search, X=None, y=None, title=None, dir_report='report'):
     """ \o/ """
-    pass
+    if not os.path.isdir(dir_report):
+        os.mkdir(dir_report)
+
+    if isinstance(X, pd.DataFrame) and isinstance(y, pd.Series):
+        score = search.score(X, y)
+        file_to_save = "{}_score-{}.txt".format(search.scoring, score)        
+    else:
+        score = None
+        file_to_save = "{}_score-{}.txt".format(search.scoring, search.best_score_)
+
+    path_to_save = os.path.join(dir_report, file_to_save)
+
+    report = []
+    
+    if title:
+        report = we.add_info(report, title)
+
+    if score:
+        report = we.add_info(report,
+                             "Score={}".format(round(score, 5)))
+    else:
+        report = we.add_info(report,
+                             "CV score={}".format(round(search.best_score_, 5)))
+
+    report = we.add_info(report, search.best_params_)
+
+    if score:
+        report = we.add_stats(report, y, search.predict(X))
+    
+    with open(path_to_save, "w") as report_file:
+        report_file.writelines("\n".join(report))
 
 
 def get_data(path):
@@ -47,7 +80,6 @@ def get_data(path):
 
 def get_notna_target(data, target_name):
     """ \o/ """    
-    # data = data.dropna(subset=[target_name])
     return data.dropna(subset=[target_name])
 
 
@@ -188,12 +220,10 @@ if __name__ == '__main__':
     estimator = get_estimator(model_type, features)
     param_grid = get_param_grid(model_type)
     
-    search = get_search(estimator, param_grid)
+    search = get_search(estimator, param_grid, score=SCORE)
     search.fit(X_train, y_train)
     
-    predict = search.predict(X_test)
-    
-    save_stats(y_test, predict)
+    save_report(search, X_test, y_test, title=ACTUAL_DATA)
     
     # 2. FUTURE DATA
     
@@ -202,9 +232,7 @@ if __name__ == '__main__':
 
     X_test, y_test = get_x_y_data(data, TARGET_NAME)
     
-    predict = search.predict(X_test)
-    
-    save_stats(y_test, predict)
+    save_report(search, X_test, y_test, title=FUTURE_DATA)
 
     print("The end")
     
