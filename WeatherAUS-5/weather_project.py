@@ -13,11 +13,13 @@ from sklearn.model_selection import GridSearchCV
 
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OrdinalEncoder
 from sklearn.preprocessing import StandardScaler
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
 
 # Custom utilities for working with weather data
 import weather_utils as we
@@ -125,9 +127,12 @@ def get_estimator(model_type, features):
     models = {
         'logreg': LogisticRegression(max_iter=10000),
         'knn': KNeighborsClassifier(),
-        'svc': SVC()
+        'svc': SVC(),
+        'tree': DecisionTreeClassifier()
     }
 
+    leaf_type_models = ['tree']  # add 'forest'
+    
     model = models.get(model_type)
     
     bin_features, num_features, cat_features = features
@@ -140,17 +145,29 @@ def get_estimator(model_type, features):
             ('imputer', SimpleImputer(strategy='most_frequent'))
     ])
 
-    numeric_transformer = Pipeline(steps=[
-            ('imputer', SimpleImputer(strategy='median')),
-            ('outlier', we.OutliersTrim(strategy='border')),
-            ('scaler', scaler)
-    ])
+    if model_type in leaf_type_models:
+        numeric_transformer = Pipeline(steps=[
+                ('imputer', SimpleImputer(strategy='mean')),
+                ('outlier', we.OutliersTrim(strategy=None))
+        ])
+    else:        
+        numeric_transformer = Pipeline(steps=[
+                ('imputer', SimpleImputer(strategy='mean')),
+                ('outlier', we.OutliersTrim(strategy='border')),
+                ('scaler', scaler)
+        ])
 
-    categorical_transformer = Pipeline(steps=[
-            ('imputer', SimpleImputer(strategy='most_frequent')),
-            ('encoder', encoder)
-    ])
-    
+    if model_type in leaf_type_models:
+        categorical_transformer = Pipeline(steps=[
+                ('imputer', SimpleImputer(strategy='most_frequent')),
+                ('encoder', OrdinalEncoder())
+        ])
+    else:
+        categorical_transformer = Pipeline(steps=[
+                ('imputer', SimpleImputer(strategy='most_frequent')),
+                ('encoder', encoder)
+        ])
+
     preprocessor = ColumnTransformer(transformers=[
             ('bin', binary_transformer, bin_features),
             ('num', numeric_transformer, num_features),
@@ -168,7 +185,9 @@ def get_estimator(model_type, features):
 
 def get_param_grid(model_type, preprocess=False):
     """ \o/ """
-    gridsearch_param = {
+    leaf_type_models = ['tree']  # add 'forest'
+
+    gridsearch_params = {
         'logreg': {
             'logreg__C': [0.1, 1, 10]
         },
@@ -177,18 +196,31 @@ def get_param_grid(model_type, preprocess=False):
         },
         'svc': {
             'svc__C': [2], 'svc__gamma': ['scale'], 'svc__kernel': ['rbf']
+        },
+        'tree': {
+            'tree__criterion': ['gini', 'entropy'], 'tree__max_depth': [None, 5, 15, 30],
+            'tree__min_samples_split': [2, 20, 40], 'tree__min_samples_leaf': [1, 10, 20]
         }
     }
 
-    preprocess_param = {
-        'preprocess__num__imputer__strategy': ['median', 'mean', 'most_frequent'],
-        'preprocess__num__outlier__strategy': ['border', 'median']
-    }
-    
-    if preprocess == False:
-        return gridsearch_param.get(model_type)
+    if model_type in leaf_type_models:
+        preprocess_param = {
+            'preprocess__num__imputer__strategy': ['mean', 'most_frequent'],
+            'preprocess__num__outlier__strategy': ['border', 'median', 'unique']
+        }
     else:
-        return [gridsearch_param.get(model_type), preprocess_param]
+        preprocess_param = {
+            'preprocess__num__imputer__strategy': ['mean', 'most_frequent'],
+            'preprocess__num__outlier__strategy': ['border', 'median']
+        }
+    
+    gridsearch_param = gridsearch_params.get(model_type)
+    
+    if preprocess == True:
+        for key, value in preprocess_param.items():
+            gridsearch_param[key] = value
+        
+    return gridsearch_param
 
 
 def get_search(estimator, param_grid, score='f1', param_cv=3, param_verbose=0):
