@@ -24,8 +24,8 @@ from sklearn.tree import DecisionTreeClassifier
 # Custom utilities for working with weather data
 import weather_utils as we
 
-ACTUAL_DATA = "data/actual_data.csv"
-FUTURE_DATA = "data/future_data.csv"
+ACTUAL_DATA = "actual_data.csv"
+FUTURE_DATA = "future_data.csv"
 TARGET_NAME = "RainTomorrow"
 
 COLUMN_SPLIT = "Region"
@@ -73,11 +73,18 @@ def save_report(search, X=None, y=None, title=None, dir_report='report'):
         report_file.writelines("\n".join(report))
 
 
-def get_data(path):
+def get_data(file_name):
     """ \o / """
-    data = pd.read_csv(path)
+    path = file_name
     
-    return we.create_data(data)
+    data_dir = 'data'
+    if os.path.isdir(data_dir):
+        path = os.path.join(data_dir, path)
+    
+    if os.path.isfile(path):
+        data = pd.read_csv(path)
+    
+        return we.create_data(data)
 
 
 def get_notna_target(data, target_name):
