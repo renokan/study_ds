@@ -1,0 +1,30 @@
+
+future_data.csv
+
+Score=0.84186
+
+{'logreg__C': 0.1}
+
+Confusion matrix:
+[[16732  3296]
+ [ 1874  4072]]
+
+              precision    recall  f1-score   support
+
+         0.0      0.899     0.835     0.866     20028
+         1.0      0.553     0.685     0.612      5946
+
+    accuracy                          0.801     25974
+   macro avg      0.726     0.760     0.739     25974
+weighted avg      0.820     0.801     0.808     25974
+
+
+balanced_accuracy: 0.760130267675708
+
+accuracy: 0.800954800954801
+
+roc_auc: 0.7601302676757081
+
+recall: 0.6848301379078372
+
+f1: 0.6116869460718041
