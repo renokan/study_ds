@@ -38,7 +38,7 @@ def print_stats(y_actual, y_predit, metrics=False):
     we.print_stats(y_actual, y_predit, metrics=False)
 
     
-def save_report(search, X=None, y=None, title=None, dir_report='report'):
+def save_report(search, X=None, y=None, title=None, prefix=None, dir_report='report'):
     """ \o/ """
     if not os.path.isdir(dir_report):
         os.mkdir(dir_report)
@@ -49,6 +49,9 @@ def save_report(search, X=None, y=None, title=None, dir_report='report'):
     else:
         score = None
         file_to_save = "{}_score-{}.txt".format(search.scoring, search.best_score_)
+
+    if prefix and isinstance(prefix, str):
+        file_to_save = prefix + "__" + file_to_save
 
     path_to_save = os.path.join(dir_report, file_to_save)
 
@@ -68,7 +71,7 @@ def save_report(search, X=None, y=None, title=None, dir_report='report'):
 
     if score:
         report = we.add_stats(report, y, search.predict(X))
-    
+        
     with open(path_to_save, "w") as report_file:
         report_file.writelines("\n".join(report))
 
@@ -277,7 +280,7 @@ if __name__ == '__main__':
     search = get_search(estimator, param_grid, score=SCORE)
     search.fit(X_train, y_train)
     
-    save_report(search, X_test, y_test, title=ACTUAL_DATA)
+    save_report(search, X_test, y_test, title=ACTUAL_DATA, prefix="test_data")
     
     # 2. FUTURE DATA
     
@@ -286,7 +289,7 @@ if __name__ == '__main__':
 
     X_test, y_test = get_x_y_data(data, TARGET_NAME)
     
-    save_report(search, X_test, y_test, title=FUTURE_DATA)
+    save_report(search, X_test, y_test, title=FUTURE_DATA, prefix="new_data")
 
     print("The end")
     
