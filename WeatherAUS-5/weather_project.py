@@ -122,7 +122,7 @@ def get_3group_features(data):
     return bin_features, num_features, cat_features
 
 
-def get_estimator(model_type, features):
+def get_estimator(model_type, features, sampling='random_under'):
     """ \o/ """
     models = {
         'logreg': LogisticRegression(max_iter=10000),
@@ -131,16 +131,23 @@ def get_estimator(model_type, features):
         'tree': DecisionTreeClassifier()
     }
 
+    random_seed = 42
+    samplers = {
+        'random_under': RandomUnderSampler(random_state=random_seed),
+        'random_over': RandomOverSampler(random_state=random_seed),
+        'smote': SMOTE()
+    }
+
+    sampler = samplers.get(sampling)
+    scaler = StandardScaler()
+    encoder = OneHotEncoder()
+    
     leaf_type_models = ['tree']  # add 'forest'
     
     model = models.get(model_type)
     
     bin_features, num_features, cat_features = features
-
-    scaler = StandardScaler()
-    encoder = OneHotEncoder()
-    sampler = RandomUnderSampler(random_state=42)
-
+   
     binary_transformer = Pipeline(steps=[
             ('imputer', SimpleImputer(strategy='most_frequent'))
     ])
@@ -174,11 +181,19 @@ def get_estimator(model_type, features):
             ('cat', categorical_transformer, cat_features)
     ])
 
-    estimator = PipelineIMB(steps=[
-            ('preprocess', preprocessor),
-            ('sampling', sampler),
-            (model_type, model)
-    ])
+    if sampler:
+        # from imblearn.pipeline import Pipeline as PipelineIMB
+        estimator = PipelineIMB(steps=[
+                ('preprocess', preprocessor),
+                ('sampling', sampler),
+                (model_type, model)
+        ])
+    else:
+        # from sklearn.pipeline import Pipeline
+        estimator = Pipeline(steps=[
+                ('preprocess', preprocessor),
+                (model_type, model)
+        ])
     
     return estimator
 
@@ -198,7 +213,7 @@ def get_param_grid(model_type, preprocess=False):
             'svc__C': [2], 'svc__gamma': ['scale'], 'svc__kernel': ['rbf']
         },
         'tree': {
-            'tree__criterion': ['gini', 'entropy'], 'tree__max_depth': [None, 5, 15, 30],
+            'tree__criterion': ['gini', 'entropy'], 'tree__max_depth': [5, 15, 30, None],
             'tree__min_samples_split': [2, 20, 40], 'tree__min_samples_leaf': [1, 10, 20]
         }
     }
