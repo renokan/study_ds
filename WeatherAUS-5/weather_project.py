@@ -1,6 +1,12 @@
 import os
 import pandas as pd
 
+import category_encoders as ce
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+# FutureWarning: is_categorical is deprecated and will be removed
+# in a future version.  Use is_categorical_dtype instead
+
 from imblearn.pipeline import Pipeline as PipelineIMB
 from imblearn.over_sampling import RandomOverSampler, SMOTE, ADASYN
 from imblearn.under_sampling import RandomUnderSampler, OneSidedSelection
@@ -14,12 +20,13 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import OrdinalEncoder
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
 
 # Custom utilities for working with weather data
 import weather_utils as we
@@ -132,112 +139,198 @@ def get_3group_features(data):
     return bin_features, num_features, cat_features
 
 
-def get_estimator(model_type, features, sampling='random_under'):
+def _get_sampler(name_sampler):
     """ \o/ """
-    models = {
-        'logreg': LogisticRegression(max_iter=10000),
-        'knn': KNeighborsClassifier(),
-        'svc': SVC(),
-        'tree': DecisionTreeClassifier()
-    }
-
+    if name_sampler == 'skip':
+        return None
+    
     random_seed = 42
     samplers = {
         'random_under': RandomUnderSampler(random_state=random_seed),
         'random_over': RandomOverSampler(random_state=random_seed),
         'smote': SMOTE()
     }
+    
+    sampler = samplers.get(name_sampler)
 
-    sampler = samplers.get(sampling)
-    scaler = StandardScaler()
-    encoder = OneHotEncoder()
+    if sampler:
+        return ('sampler', sampler)
+    else:
+        raise NameError(f"Incorrect parameter: {name_sampler}")
+
     
-    leaf_type_models = ['tree']  # add 'forest'
+def _get_scaler(name_scaler):
+    """ \o/ """
+    if name_scaler == 'skip':
+        return None
+
+    scalers = {
+        'standard': StandardScaler(),
+        'minmax': MinMaxScaler(),
+        'robust': RobustScaler()
+    }
     
-    model = models.get(model_type)
+    scaler = scalers.get(name_scaler)
+
+    if scaler:
+        return ('scaler', scaler)
+    else:
+        raise NameError(f"Incorrect parameter: {name_scaler}")
+
+
+def _get_encoder(name_encoder):
+    """ \o/ """
+    if name_encoder == 'skip':
+        return None
+
+    encoders = {
+        'ordinal': OrdinalEncoder(),
+        'one_hot': OneHotEncoder(),
+        'target': ce.TargetEncoder(handle_unknown='ignore'),
+        'binary': ce.BinaryEncoder(),
+        'count': ce.CountEncoder()
+    }
+
+    encoder = encoders.get(name_encoder)
     
-    bin_features, num_features, cat_features = features
-   
-    binary_transformer = Pipeline(steps=[
+    if encoder:
+        return ('encoder', encoder)
+    else:
+        raise NameError(f"Incorrect parameter: {name_encoder}")
+
+
+def _get_transformers(scaling, encoding):
+    """ \o/ """
+    
+    # 1. binary transformer
+    
+    bin_transformer = Pipeline(steps=[
             ('imputer', SimpleImputer(strategy='most_frequent'))
     ])
 
-    if model_type in leaf_type_models:
-        numeric_transformer = Pipeline(steps=[
-                ('imputer', SimpleImputer(strategy='mean')),
-                ('outlier', we.OutliersTrim(strategy=None))
-        ])
-    else:        
-        numeric_transformer = Pipeline(steps=[
-                ('imputer', SimpleImputer(strategy='mean')),
-                ('outlier', we.OutliersTrim(strategy='border')),
-                ('scaler', scaler)
-        ])
+    # 2. numeric_transformer
+    # steps = 'imputer' + 'outlier' + 'scaler' (scaling=[...])
 
-    if model_type in leaf_type_models:
-        categorical_transformer = Pipeline(steps=[
-                ('imputer', SimpleImputer(strategy='most_frequent')),
-                ('encoder', OrdinalEncoder())
-        ])
-    else:
-        categorical_transformer = Pipeline(steps=[
-                ('imputer', SimpleImputer(strategy='most_frequent')),
-                ('encoder', encoder)
-        ])
+    steps_num_transformer = [('imputer', SimpleImputer(strategy='median')),
+                             ('outlier', we.OutliersTrim(strategy='border'))]
 
-    preprocessor = ColumnTransformer(transformers=[
-            ('bin', binary_transformer, bin_features),
-            ('num', numeric_transformer, num_features),
-            ('cat', categorical_transformer, cat_features)
-    ])
+    scaler = _get_scaler(scaling)
+    
+    if scaler:
+        steps_num_transformer.append(scaler)
 
+    num_transformer = Pipeline(steps=steps_num_transformer)
+
+    # 3. categorical_transformer
+    # steps = 'imputer' + 'encoder' (encoding=[...])
+    
+    steps_cat_transformer = [('imputer', SimpleImputer(strategy='most_frequent'))]
+
+    encoder = _get_encoder(encoding)
+    
+    if encoder:
+        steps_cat_transformer.append(encoder)
+
+    cat_transformer = Pipeline(steps=steps_cat_transformer)
+    
+    return bin_transformer, num_transformer, cat_transformer
+
+
+def _select_estimator(preprocessor, sampling, model_type):
+    """ \o/ """
+    # First step: add 'preprocess'
+    steps_estimator = [('preprocess', preprocessor)]
+
+    sampler = _get_sampler(sampling)
+
+    # Next step: add 'sampler'
+    if sampler:
+        steps_estimator.append(sampler)
+        
+    # Last step: add model_type
+    models = {
+        'logreg': LogisticRegression(max_iter=10000),
+        'knn': KNeighborsClassifier(),
+        'svc': SVC(),
+        'tree': DecisionTreeClassifier(),
+        'forest': RandomForestClassifier()
+    }
+    
+    model = models.get(model_type)    
+    steps_estimator.append((model_type, model))
+
+    # Select Pipeline
     if sampler:
         # from imblearn.pipeline import Pipeline as PipelineIMB
-        estimator = PipelineIMB(steps=[
-                ('preprocess', preprocessor),
-                ('sampling', sampler),
-                (model_type, model)
-        ])
+        estimator = PipelineIMB(steps=steps_estimator)
     else:
         # from sklearn.pipeline import Pipeline
-        estimator = Pipeline(steps=[
-                ('preprocess', preprocessor),
-                (model_type, model)
-        ])
+        estimator = Pipeline(steps=steps_estimator)
+        
+    return estimator
+
+        
+def get_estimator(model_type, features, scaling=None, encoding=None, sampling=None):
+    """ \o/ """
+    # Set default parameters:
+    
+    if not scaling:
+        scaling = 'standard'
+        
+    if not encoding:
+        encoding ='one_hot'
+    
+    if not sampling:
+        sampling ='random_under'
+    
+    bin_transformer, num_transformer, cat_transformer = _get_transformers(scaling, encoding)
+
+    bin_features, num_features, cat_features = features
+    
+    # Make preprocessor
+
+    preprocessor = ColumnTransformer(transformers=[
+            ('bin', bin_transformer, bin_features),
+            ('num', num_transformer, num_features),
+            ('cat', cat_transformer, cat_features)
+    ])
+
+    # Select estimator
+    
+    estimator = _select_estimator(preprocessor, sampling, model_type)
     
     return estimator
 
 
 def get_param_grid(model_type, preprocess=False):
     """ \o/ """
-    leaf_type_models = ['tree']  # add 'forest'
-
     gridsearch_params = {
         'logreg': {
-            'logreg__C': [0.1, 1, 10]
+            'logreg__C': [0.1, 1, 10, 100, 1000]
         },
         'knn': {
-            'knn__n_neighbors': [9, 12, 15]
+            'knn__n_neighbors': [3, 5, 9, 12, 15]
         },
         'svc': {
-            'svc__C': [2], 'svc__gamma': ['scale'], 'svc__kernel': ['rbf']
+            'svc__C': [1, 2], 'svc__kernel': ['rbf', 'poly']
         },
         'tree': {
-            'tree__criterion': ['gini', 'entropy'], 'tree__max_depth': [5, 15, 30, None],
-            'tree__min_samples_split': [2, 20, 40], 'tree__min_samples_leaf': [1, 10, 20]
+            'tree__criterion': ['gini'], 'tree__max_depth': [5, 10],
+            'tree__min_samples_split': [10, 20], 'tree__min_samples_leaf': [5, 10],
+            'preprocess__num__outlier__strategy': ['border', 'median', 'unique', None]
+        },
+        'forest': {
+            'forest__n_estimators': [100, 150, 200],
+            'forest__max_features': [0.7, 0.8], 'forest__max_depth': [5],
+            'forest__min_samples_split': [10, 20], 'forest__min_samples_leaf': [5, 10],
+            'preprocess__num__outlier__strategy': ['border', 'median', 'unique', None]
         }
     }
 
-    if model_type in leaf_type_models:
-        preprocess_param = {
-            'preprocess__num__imputer__strategy': ['mean', 'most_frequent'],
-            'preprocess__num__outlier__strategy': ['border', 'median', 'unique']
-        }
-    else:
-        preprocess_param = {
-            'preprocess__num__imputer__strategy': ['mean', 'most_frequent'],
-            'preprocess__num__outlier__strategy': ['border', 'median']
-        }
+    preprocess_param = {
+        'preprocess__num__imputer__strategy': ['mean', 'most_frequent'],
+        'preprocess__num__outlier__strategy': ['border', 'median', None]
+    }
     
     gridsearch_param = gridsearch_params.get(model_type)
     
